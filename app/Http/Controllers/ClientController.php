@@ -45,20 +45,25 @@ class ClientController extends Controller
     public function update(Request $request, $id)
     {
         // اعتبارسنجی داده‌های درخواستی
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email,'.$id,
             'mobile' => 'required|mobile|unique:clients,mobile,'.$id,
         ]);
     
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+    
         $client = Client::find($id);
-        $client->name = $validatedData['name'];
-        $client->email = $validatedData['email'];
-        $client->mobile = $validatedData['mobile'];
+        $client->name = $request->input('name');
+        $client->email = $request->input('email');
+        $client->mobile = $request->input('mobile');
         $client->save();
     
         return response()->json($client);
     }
+    
 
     public function destroy($id)
     {
